@@ -27,15 +27,15 @@ router.get("/posts/:postId", async (req, res, next) => {
 //Fetching Categories For Viewing//
 router.get("/categories", async (req, res) => {
   const categories = await queries.getAllCategories();
-  res.sendStatus(200).json({ categories });
+  res.json(categories);
 });
 
 // Adding comments //
 router.post("/posts/:postId/comments", async (req, res) => {
   const author = req.body["author"];
   const comment = req.body["comment"];
-  const postId = req.params["PostId"];
-  await queries.addComment(author, comment, postId);
+  const postId = req.params["postId"];
+  await queries.addComment(postId, author, comment);
   res.sendStatus(201);
 });
 

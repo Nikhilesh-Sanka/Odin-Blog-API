@@ -17,16 +17,16 @@ router.get("/", async (req, res) => {
     },
   });
   if (result == null) {
-    res.sendStatus(403).json({ error: "username does not exists" });
+    res.sendStatus(403);
   } else if (result.password === password) {
     let rawToken = jwt.sign(
       { id: result.id, name: result.name },
       process.env.TOKEN_SECRET
     );
     let processedToken = `Bearer ${rawToken}`;
-    res.sendStatus(200).json({ token: processedToken });
+    res.json({ token: processedToken });
   } else {
-    res.sendStatus(403).json({ error: "incorrect password" });
+    res.sendStatus(403);
   }
 });
 

@@ -31,12 +31,8 @@ const getPost = async (postId) => {
   return result;
 };
 const getAllCategories = async () => {
-  result = await prisma.category.findMany({
-    include: {
-      name: true,
-      id: true,
-    },
-  });
+  result = await prisma.category.findMany({});
+  return result;
 };
 const addComment = async (postId, author, comment) => {
   const processedPostId = parseInt(postId);
@@ -65,9 +61,6 @@ const getPostsOfUsers = async (userId) => {
       authorId: processedUserId,
     },
     include: {
-      id: true,
-      title: true,
-      creationTime: true,
       categories: true,
     },
   });
@@ -75,18 +68,16 @@ const getPostsOfUsers = async (userId) => {
 };
 const addPost = async (userId, title, content, categories, publishStatus) => {
   const processedUserId = parseInt(userId);
-  let categoriesCreateArray = [];
-  for (let categoryId of categories) {
-    let processedCategoryId = parseInt(categoryId);
-    categoriesCreateArray.push({ category: { connect: processedCategoryId } });
-  }
+  let categoriesCreateArray = categories.map((categoryId) => {
+    return { id: parseInt(categoryId) };
+  });
   await prisma.post.create({
     data: {
       title: title,
       content: content,
-      userId: processedUserId,
+      authorId: processedUserId,
       categories: {
-        create: categoriesCreateArray,
+        connect: categoriesCreateArray,
       },
       isPublished: publishStatus,
     },
@@ -102,11 +93,19 @@ const editPost = async (
 ) => {
   const processedPostId = parseInt(postId);
   const processedUserId = parseInt(userId);
-  let categoriesCreateArray = [];
-  for (let categoryId of categories) {
-    let processedCategoryId = parseInt(categoryId);
-    categoriesCreateArray.push({ category: { connect: processedCategoryId } });
-  }
+  let categoriesCreateArray = categories.map((categoryId) => {
+    return { id: parseInt(categoryId) };
+  });
+  await prisma.post.update({
+    where: {
+      id: processedPostId,
+    },
+    data: {
+      categories: {
+        set: [],
+      },
+    },
+  });
   await prisma.post.update({
     where: {
       id: processedPostId,
@@ -114,9 +113,9 @@ const editPost = async (
     data: {
       title: title,
       content: content,
-      userId: processedUserId,
+      authorId: processedUserId,
       categories: {
-        create: categoriesCreateArray,
+        connect: categoriesCreateArray,
       },
       isPublished: publishStatus,
     },

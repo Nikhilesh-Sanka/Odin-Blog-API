@@ -10,7 +10,6 @@ const prisma = new PrismaClient();
 const router = Router();
 
 const validateInputs = [
-  body("username").trim().notEmpty().withMessage("Username cannot be empty"),
   body("username").custom(async (value) => {
     const processedUsername = value.toLowerCase();
     const result = await prisma.user.findMany({
@@ -28,12 +27,13 @@ const validateInputs = [
 ];
 
 router.post("/", validateInputs, async (req, res) => {
+  console.log(req.body);
   const errors = validationResult(req).errors;
   if (errors.length === 0) {
     await queries.addUser(req.body["username"], req.body["password"]);
     res.sendStatus(201);
   } else {
-    res.sendStatus(400).json(errors);
+    res.json(errors);
   }
 });
 

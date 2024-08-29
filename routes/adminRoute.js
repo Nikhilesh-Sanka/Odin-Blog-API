@@ -7,46 +7,37 @@ const router = Router();
 router.get("/posts", async (req, res) => {
   let userId = req.user.id;
   let posts = await queries.getPostsOfUsers(userId);
-  req.sendStatus(200).json(posts);
+  res.json(posts);
 });
 
 //Fetching individual posts//
 router.get("/posts/:postId", async (req, res) => {
   let postId = req.params["postId"];
   let post = await queries.getPost(postId);
-  res.sendStatus(200).json(post);
+  res.json(post);
 });
 
 //Creating post//
 router.post("/posts", async (req, res) => {
+  console.log(req.body);
   const userId = req.user.id;
-  const categories = [];
-  for (let field in req.body) {
-    if (/checkbox-[0-9]*/.test(field)) {
-      categories.push(req.body[field]);
-    }
-  }
+  const categories = req.body.categories;
   const content = req.body["content"];
   const title = req.body["title"];
-  const publishStatus = req.body["publish-status"] === "true" ? true : false;
+  const publishStatus = req.body["publish-status"];
   await queries.addPost(userId, title, content, categories, publishStatus);
-  req.sendStatus(201);
+  res.sendStatus(201);
 });
 
 //Editing the posts//
-router.put("/posts/postId", async (req, res) => {
+router.put("/posts/:postId", async (req, res) => {
   let postId = req.params["postId"];
-  let updatedPublishedStatus =
-    req.body["publish-status"] === "true" ? true : false;
+  let updatedPublishedStatus = req.body["publish-status"];
   let userId = req.user.id;
   let updatedContent = req.body["content"];
   let updatedTitle = req.body["title"];
-  let updatedCategories = [];
-  for (let field in req.body) {
-    if (/checkbox-[0-9]*/.test(field)) {
-      updatedCategories.push(req.body[field]);
-    }
-  }
+  let updatedCategories = req.body.categories;
+  console.log(req.body);
   await queries.editPost(
     userId,
     updatedTitle,
@@ -55,6 +46,7 @@ router.put("/posts/postId", async (req, res) => {
     updatedPublishedStatus,
     postId
   );
+  res.sendStatus(201);
 });
 
 //Deleting the posts//
